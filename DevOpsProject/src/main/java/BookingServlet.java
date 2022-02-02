@@ -24,6 +24,10 @@ public class BookingServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
+	public BookingServlet() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	private String jdbcURL = "jdbc:mysql://localhost:3306/hotelbooking";
 	private String jdbcUsername = "root";
@@ -34,12 +38,7 @@ public class BookingServlet extends HttpServlet {
 	private static final String SELECT_BOOKING_BY_ID = "select name, hotel, roomnumber, startdate, enddate from HotelBooking where name =?";
 	private static final String SELECT_ALL_BOOKINGS = "select * from HotelBooking ";
 	private static final String DELETE_BOOKINGS_SQL = "delete from HotelBooking where name = ?;";
-	private static final String UPDATE_BOOKINGS_SQL = "update UserDetails set name = ?,hotel= ?, roomnumber =?,startdate =?,enddate =? where name = ?;";
-
-	public BookingServlet() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+	private static final String UPDATE_BOOKINGS_SQL = "update HotelBooking set name = ?,hotel= ?, roomnumber =?,startdate =?,enddate =? where name = ?;";
 
 	protected Connection getConnection() {
 		Connection connection = null;
@@ -53,32 +52,29 @@ public class BookingServlet extends HttpServlet {
 		}
 		return connection;
 	}
-	
+
 	private void listBookings(HttpServletRequest request, HttpServletResponse response)
-			throws SQLException, IOException, ServletException
-			{
-			List <Booking> bookings = new ArrayList <>();
-			 try (Connection connection = getConnection();
-					 
-					 PreparedStatement preparedStatement =
-							 connection.prepareStatement(SELECT_ALL_BOOKINGS);) {
-				 ResultSet rs = preparedStatement.executeQuery();
-				 
-				 while (rs.next()) {
-					 String name = rs.getString("name");
-					 String hotel = rs.getString("hotel");
-					 String roomnumber = rs.getString("roomnumber");
-					 String startdate = rs.getString("startdate");
-					 String enddate = rs.getString("enddate");
-					 bookings.add(new Booking(name, hotel, roomnumber, startdate, enddate));
-					 }
-					 } catch (SQLException e) {
-					 System.out.println(e.getMessage());
-					 }
-			 request.setAttribute("listBookings", bookings);
-			 request.getRequestDispatcher("/bookingManagement.jsp").forward(request, response);
-			 }
-	
+			throws SQLException, IOException, ServletException {
+		List<Booking> bookings = new ArrayList<>();
+		try (Connection connection = getConnection();
+
+				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_BOOKINGS);) {
+			ResultSet rs = preparedStatement.executeQuery();
+
+			while (rs.next()) {
+				String name = rs.getString("name");
+				String hotel = rs.getString("hotel");
+				String roomnumber = rs.getString("roomnumber");
+				String startdate = rs.getString("startdate");
+				String enddate = rs.getString("enddate");
+				bookings.add(new Booking(name, hotel, roomnumber, startdate, enddate));
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		request.setAttribute("listBookings", bookings);
+		request.getRequestDispatcher("/bookingManagement.jsp").forward(request, response);
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
@@ -90,15 +86,14 @@ public class BookingServlet extends HttpServlet {
 		String action = request.getServletPath();
 		try {
 			switch (action) {
-			case "/insert":
+			case "/BookingServlet/edit":
+				showEditForm(request, response);
 				break;
-			case "/delete":
+			case "/BookingServlet/update":
+				updateBooking(request, response);
 				break;
-			case "/edit":
-				break;
-			case "/update":
-				break;
-			default:
+			case "/BookingServlet/dashboard":
+
 				listBookings(request, response);
 				break;
 			}
@@ -108,6 +103,59 @@ public class BookingServlet extends HttpServlet {
 
 		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
+	}
+
+	private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, ServletException, IOException {
+
+		String name = request.getParameter("name");
+
+		Booking existingBooking = new Booking("", "", "", "", "");
+
+		try (Connection connection = getConnection();
+
+				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_BOOKING_BY_ID);) {
+			preparedStatement.setString(1, name);
+
+			ResultSet rs = preparedStatement.executeQuery();
+
+			while (rs.next()) {
+				name = rs.getString("name");
+				String hotel = rs.getString("hotel");
+				String roomnumber = rs.getString("roomnumber");
+				String startdate = rs.getString("startdate");
+				String enddate = rs.getString("enddate");
+				existingBooking = new Booking(name, hotel, roomnumber, startdate, enddate);
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		request.setAttribute("booking", existingBooking);
+		request.getRequestDispatcher("/bookingEdit.jsp").forward(request, response);
+		// TODO Auto-generated method stub
+
+	}
+
+	private void updateBooking(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, IOException {
+		String oriName = request.getParameter("oriName");
+		String name = request.getParameter("name");
+		String hotel = request.getParameter("hotel");
+		String roomnumber = request.getParameter("roomnumber");
+		String startdate = request.getParameter("startdate");
+		String enddate = request.getParameter("enddate");
+
+		try (Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(UPDATE_BOOKINGS_SQL);) {
+			statement.setString(1, name);
+			statement.setString(2, hotel);
+			statement.setString(3, roomnumber);
+			statement.setString(4, startdate);
+			statement.setString(5, enddate);
+			statement.setString(6, oriName);
+			int i = statement.executeUpdate();
+		}
+		response.sendRedirect("http://localhost:8090/DevOpsProject/BookingServlet/dashboard");
 	}
 
 	/**
