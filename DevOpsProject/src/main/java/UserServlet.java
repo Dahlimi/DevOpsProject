@@ -67,21 +67,78 @@ public class UserServlet extends HttpServlet {
 		String action = request.getServletPath();
 		try {
 			switch (action) {
-			case "/insert":
+			case "/UserServlet/delete":
+				deleteUser(request, response);
 				break;
-			case "/delete":
+			case "/UserServlet/edit":
+				showEditForm(request, response);
 				break;
-			case "/edit":
+			case "/UserServlet/update":
+				updateUser(request, response);
 				break;
-			case "/update":
-				break;
-			default:
+			case "/UserServlet/dashboard":
 				listUsers(request, response);
 				break;
 			}
 		} catch (SQLException ex) {
 			throw new ServletException(ex);
 		}
+	}
+
+	private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, ServletException, IOException {
+		String name = request.getParameter("name");
+
+		User existingUser = new User("", "", "", "");
+		try (Connection connection = getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_BY_ID);) {
+			preparedStatement.setString(1, name);
+			ResultSet rs = preparedStatement.executeQuery();
+
+			while (rs.next()) {
+				name = rs.getString("name");
+				String password = rs.getString("password");
+				String email = rs.getString("email");
+				String contact = rs.getString("contact");
+				existingUser = new User(name, password, email, contact);
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+
+		request.setAttribute("user", existingUser);
+		request.getRequestDispatcher("/userEdit.jsp").forward(request, response);
+	}
+
+	private void updateUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+
+		String oriName = request.getParameter("oriName");
+		String name = request.getParameter("name");
+		String password = request.getParameter("password");
+		String email = request.getParameter("email");
+		String contact = request.getParameter("contact");
+
+		try (Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL);) {
+			statement.setString(1, name);
+			statement.setString(2, password);
+			statement.setString(3, email);
+			statement.setString(4, contact);
+			statement.setString(5, oriName);
+			int i = statement.executeUpdate();
+		}
+		response.sendRedirect("http://localhost:8090/DevOpsProject/UserServlet/dashboard");
+	}
+
+	private void deleteUser(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+		String name = request.getParameter("name");
+
+		try (Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(DELETE_USERS_SQL);) {
+			statement.setString(1, name);
+			int i = statement.executeUpdate();
+		}
+		response.sendRedirect("http://localhost:8090/DevOpsProject/UserServlet/dashboard");
 	}
 
 	private void listUsers(HttpServletRequest request, HttpServletResponse response)
@@ -103,7 +160,6 @@ public class UserServlet extends HttpServlet {
 		request.setAttribute("listUsers", users);
 		request.getRequestDispatcher("/userManagement.jsp").forward(request, response);
 	}
-			
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
