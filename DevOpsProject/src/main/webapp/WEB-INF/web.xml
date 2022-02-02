@@ -40,5 +40,18 @@
 		<url-pattern>/UserServlet/delete</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>HotelServlet</servlet-name>
+		<servlet-class>HotelServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>HotelServlet</servlet-name>
+		<url-pattern>/HotelServlet/dashboard</url-pattern>
+		<url-pattern>/HotelServlet/edit</url-pattern>
+		<url-pattern>/HotelServlet/update</url-pattern>
+		<url-pattern>/HotelServlet/delete</url-pattern>
+	</servlet-mapping>
+
 
 </web-app>

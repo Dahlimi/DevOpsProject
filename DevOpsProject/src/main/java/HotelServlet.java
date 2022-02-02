@@ -62,15 +62,16 @@ public class HotelServlet extends HttpServlet {
 		String action = request.getServletPath();
 		try {
 			switch (action) {
-			case "/insert":
+			case "/HotelServlet/delete":
+				deleteHotel(request, response);
 				break;
-			case "/delete":
+			case "/HotelServlet/edit":
+				showEditForm(request, response);
 				break;
-			case "/edit":
+			case "/HotelServlet/update":
+				updateHotel(request, response);
 				break;
-			case "/update":
-				break;
-			default:
+			case "/HotelServlet/dashboard":
 				listHotels(request, response);
 				break;
 			}
@@ -101,11 +102,11 @@ public class HotelServlet extends HttpServlet {
 			while (rs.next()) {
 				String name = rs.getString("name");
 				String address = rs.getString("address");
-				String star = rs.getString("star");
 				String pricing = rs.getString("pricing");
+				String star = rs.getString("star");
 				String image = rs.getString("image");
 
-				hotels.add(new Hotel(name, address, star, pricing, image));
+				hotels.add(new Hotel(name, address, pricing, star, image));
 			}
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
@@ -113,5 +114,63 @@ public class HotelServlet extends HttpServlet {
 		request.setAttribute("listHotels", hotels);
 		request.getRequestDispatcher("/hotelManagement.jsp").forward(request, response);
 	}
+
+	private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, ServletException, IOException {
+		String name = request.getParameter("name");
+		Hotel existingHotel = new Hotel("", "", "", "", "");
+		try (Connection connection = getConnection();
+				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_HOTEL_BY_ID);) {
+			preparedStatement.setString(1, name);
+			ResultSet rs = preparedStatement.executeQuery();
+			while (rs.next()) {
+				name = rs.getString("name");
+				String address = rs.getString("address");
+				String pricing = rs.getString("pricing");
+				String star = rs.getString("star");
+				String image = rs.getString("image");
+				existingHotel = new Hotel(name, address, pricing, star, image);
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+		}
+		request.setAttribute("hotel", existingHotel);
+		request.getRequestDispatcher("/hotelEdit.jsp").forward(request, response);
+	}
+	private void updateHotel(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, IOException {
+		
+		String oriName = request.getParameter("oriName");
+		 String name = request.getParameter("name");
+		 String address = request.getParameter("address");
+		 String pricing = request.getParameter("pricing");
+		 String star = request.getParameter("star");
+		 String image = request.getParameter("image");
+		 
+		 try (Connection connection = getConnection(); PreparedStatement statement =
+				 connection.prepareStatement(UPDATE_HOTELS_SQL);) {
+				  statement.setString(1, name);
+				  statement.setString(2, address);
+				  statement.setString(3, pricing);
+				  statement.setString(4, star);
+				  statement.setString(5, image);
+				  statement.setString(6, oriName);
+				  int i = statement.executeUpdate();
+				  }
+		 response.sendRedirect("http://localhost:8090/DevOpsProject/HotelServlet/dashboard");
+	}
+	
+	private void deleteHotel(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, IOException {
+		String name = request.getParameter("name");
+		try (Connection connection = getConnection(); PreparedStatement statement =
+				connection.prepareStatement(DELETE_HOTELS_SQL);) {
+				 statement.setString(1, name);
+				 int i = statement.executeUpdate();
+				 }
+		response.sendRedirect("http://localhost:8090/DevOpsProject/HotelServlet/dashboard");
+	}
+
+	
 
 }
