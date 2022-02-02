@@ -92,6 +92,9 @@ public class BookingServlet extends HttpServlet {
 			case "/BookingServlet/update":
 				updateBooking(request, response);
 				break;
+			case "/BookingServlet/delete":
+				deleteBooking(request, response);
+				break;
 			case "/BookingServlet/dashboard":
 
 				listBookings(request, response);
@@ -156,6 +159,20 @@ public class BookingServlet extends HttpServlet {
 			int i = statement.executeUpdate();
 		}
 		response.sendRedirect("http://localhost:8090/DevOpsProject/BookingServlet/dashboard");
+	}
+
+	private void deleteBooking(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, IOException {
+
+		String name = request.getParameter("name");
+
+		try (Connection connection = getConnection();
+				PreparedStatement statement = connection.prepareStatement(DELETE_BOOKINGS_SQL);) {
+			statement.setString(1, name);
+			int i = statement.executeUpdate();
+		}
+		response.sendRedirect("http://localhost:8090/DevOpsProject/BookingServlet/dashboard");
+
 	}
 
 	/**
