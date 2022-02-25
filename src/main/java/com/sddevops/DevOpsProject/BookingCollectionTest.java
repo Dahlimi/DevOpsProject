@@ -83,16 +83,16 @@ class BookingCollectionTest {
 		 List<Booking> testBc = bc.sortBookingsByName();
 
 	        // Arrange
-	        String newBookingName1 = testBc.get(0).getName();
-	        String newBookingName2 = testBc.get(1).getName();
-	        String newBookingName3 = testBc.get(2).getName();
-	        String newBookingName4 = testBc.get(3).getName();
+	        String a = testBc.get(0).getName();
+	        String b = testBc.get(1).getName();
+	        String c = testBc.get(2).getName();
+	        String d = testBc.get(3).getName();
 	        
 	        
-	        assertEquals(newBookingName1, "Dahlimi Kuryadi Bin Dahlan");
-	        assertEquals(newBookingName2, "Kwan Gavin");
-	        assertEquals(newBookingName3, "Lim Zheng Yang");
-	        assertEquals(newBookingName4, "Ng Zhong Qi");
+	        assertEquals(a, "Dahlimi Kuryadi Bin Dahlan");
+	        assertEquals(b, "Kwan Gavin");
+	        assertEquals(c, "Lim Zheng Yang");
+	        assertEquals(d, "Ng Zhong Qi");
 	}
 
 	/**
