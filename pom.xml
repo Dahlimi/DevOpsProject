@@ -54,7 +54,6 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<version>6.9.10</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -70,11 +69,6 @@
 			<artifactId>${junit-jupiter.artifactId}</artifactId>
 			<version>${junit-jupiter.version}</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-			<version>5.7.0</version>
 		</dependency>
 
 	</dependencies>
